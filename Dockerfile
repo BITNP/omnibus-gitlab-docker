@@ -1,5 +1,5 @@
 FROM gitlab/gitlab-ce:latest
-ENV OPENSSH_VERSION openssh-8.2p1
+ARG OPENSSH_VERSION=openssh-8.2p1
 # The actual build version can be changed via CI env
 
 # Compile OpenSSH ourselves
