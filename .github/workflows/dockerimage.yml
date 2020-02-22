@@ -17,5 +17,5 @@ jobs:
     - name: Test the SSH version
       run: |
         if docker ps -a | grep test | grep "Stop\|Restart\|Exit"; then docker logs test;exit 1; fi
-        if ! ssh -v "`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test`" | grep "%{OPENSSH_VERSION/-/_}"; then docker logs test;exit 1; fi
+        if ! ssh -v "`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test`" 2>&1 | grep "${OPENSSH_VERSION/-/_}"; then docker logs test;exit 1; fi
         docker ps
