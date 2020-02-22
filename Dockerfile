@@ -6,7 +6,7 @@ ARG OPENSSH_VERSION=openssh-8.2p1
 RUN apt-get update -q \
     && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends build-essential zlib1g-dev libssl-dev libpam0g-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /tmp/openssh/ cd /tmp/openssh/ \
+    && mkdir -p /tmp/openssh/ && cd /tmp/openssh/ \
     && wget -c https://mirrors.tuna.tsinghua.edu.cn/OpenBSD/OpenSSH/portable/$OPENSSH_VERSION.tar.gz \
     && tar -xzf $OPENSSH_VERSION.tar.gz \
     && cd $OPENSSH_VERSION/ \
