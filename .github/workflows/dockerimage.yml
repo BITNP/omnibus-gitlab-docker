@@ -3,6 +3,7 @@ on: [push]
 env:
   OPENSSH_VERSION: openssh-8.2p1
   OPENSSH_MATCH: remote software version OpenSSH_8.2
+  IMAGE_TAG: bitnp/gitlab-ce:latest
 
 jobs:
   testpub:
@@ -10,10 +11,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag bitnp/gitlab-ce:nightly
+      run: docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_TAG
     - name: Start the container
       run: |
-        docker run -d --name test bitnp/gitlab-ce:nightly
+        docker run -d --name test $IMAGE_TAG
         sleep 10
     - name: Test SSH version
       # we use nonexisting to sign in intentionally - we don't want to go through the login process
@@ -22,3 +23,9 @@ jobs:
         if docker ps -a | grep test | grep "Stop\|Restart\|Exit"; then docker logs test;exit 1; fi
         export TEST_DOCKER_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test`
         if ! docker exec test ssh -v nonexisting@127.0.0.1 2>&1 | grep "${OPENSSH_MATCH}"; then docker ps && docker logs test;exit 1; fi
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: $IMAGE_TAG
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
