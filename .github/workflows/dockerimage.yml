@@ -18,5 +18,5 @@ jobs:
       run: |
         if docker ps -a | grep test | grep "Stop\|Restart\|Exit"; then docker logs test;exit 1; fi
         export TEST_DOCKER_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test`
-        docker exec -it test ssh -v git@127.0.0.1 2>&1
-        if ! docker exec -it test ssh -v git@127.0.0.1 2>&1 | grep "${OPENSSH_VERSION/-/_}"; then docker ps && docker logs test;exit 1; fi
+        docker exec test ssh -v git@127.0.0.1 2>&1
+        if ! docker exec test ssh -v git@127.0.0.1 2>&1 | grep "${OPENSSH_VERSION/-/_}"; then docker ps && docker logs test;exit 1; fi
