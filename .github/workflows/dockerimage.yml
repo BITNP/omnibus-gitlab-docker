@@ -2,9 +2,10 @@ name: Docker Image CI
 on: [push]
 env:
   OPENSSH_VERSION: openssh-8.2p1
+  OPENSSH_MATCH: remote software version OpenSSH_8.2
 
 jobs:
-  test:
+  testpub:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -15,8 +16,9 @@ jobs:
         docker run -d --name test bitnp/gitlab-ce:nightly
         sleep 10
     - name: Test SSH version
+      # we use nonexisting to sign in intentionally - we don't want to go through the login process
+      # because we just need the version info
       run: |
         if docker ps -a | grep test | grep "Stop\|Restart\|Exit"; then docker logs test;exit 1; fi
         export TEST_DOCKER_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test`
-        docker exec test ssh -v git@127.0.0.1 2>&1
-        if ! docker exec test ssh -v git@127.0.0.1 2>&1 | grep "${OPENSSH_VERSION/-/_}"; then docker ps && docker logs test;exit 1; fi
+        if ! docker exec test ssh -v nonexisting@127.0.0.1 2>&1 | grep "${OPENSSH_MATCH}"; then docker ps && docker logs test;exit 1; fi
