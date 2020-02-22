@@ -1,5 +1,10 @@
 name: Docker Image CI
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '3 1 1/3 * *'
 env:
   OPENSSH_VERSION: openssh-8.2p1
   OPENSSH_MATCH: remote software version OpenSSH_8.2
@@ -26,6 +31,6 @@ jobs:
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: $IMAGE_TAG
+        name: ${{ env.IMAGE_TAG }}
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
