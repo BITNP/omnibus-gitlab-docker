@@ -11,4 +11,5 @@ RUN apt-get update -q \
     && cd ${OPENSSH_VERSION}/ \
     && ./configure \
     && make && make install \
-    && rm -rf /tmp/openssh/
+    && rm -rf /tmp/openssh/ \
+    && sed 's|/usr/sbin/sshd|/usr/local/sbin/sshd|g' -i /opt/gitlab/sv/sshd/run
