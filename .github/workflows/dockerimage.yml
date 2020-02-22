@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --build-arg OPENSSH_VERSION=%{OPENSSH_VERSION} --tag bitnp/gitlab-ce:nightly
+      run: docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag bitnp/gitlab-ce:nightly
     - name: Start the container
       run: |
         docker run -d --name test bitnp/gitlab-ce:nightly
