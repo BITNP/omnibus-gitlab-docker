@@ -16,7 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_TAG
+      run: |
+        docker pull gitlab/gitlab-ce:latest
+        docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_TAG
     - name: Start the container
       run: |
         docker run -d --name test $IMAGE_TAG
