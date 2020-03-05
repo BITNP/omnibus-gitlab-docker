@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Image
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
 env:
   OPENSSH_VERSION: openssh-8.2p1
   OPENSSH_MATCH: remote software version OpenSSH_8.2
-  IMAGE_TAG: bitnp/gitlab-ce:latest
+  IMAGE_REPO: bitnp/gitlab-ce
 
 jobs:
   testpub:
@@ -18,11 +18,13 @@ jobs:
     - name: Build the Docker image
       run: |
         docker pull gitlab/gitlab-ce:latest
-        docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_TAG
+        docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_LABEL:latest
     - name: Start the container
       run: |
-        docker run -d --name test $IMAGE_TAG
+        docker run -d --name test $IMAGE_LABEL:latest
         sleep 10
+        export GITLAB_RELEASE_VERSION=$(docker exec test cat /RELEASE)
+        echo $GITLAB_RELEASE_VERSION
     - name: Test SSH version
       # we use nonexisting to sign in intentionally - we don't want to go through the login process
       # because we just need the version info
@@ -33,6 +35,7 @@ jobs:
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: ${{ env.IMAGE_TAG }}
+        name: ${{ env.IMAGE_REPO }}
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: latest,${{ env.GITLAB_RELEASE_VERSION }}
