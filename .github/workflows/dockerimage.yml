@@ -18,10 +18,10 @@ jobs:
     - name: Build the Docker image
       run: |
         docker pull gitlab/gitlab-ce:latest
-        docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_LABEL:latest
+        docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_REPO:latest
     - name: Start the container
       run: |
-        docker run -d --name test $IMAGE_LABEL:latest
+        docker run -d --name test $IMAGE_REPO:latest
         sleep 10
         export GITLAB_RELEASE_VERSION=$(docker exec test cat /RELEASE)
         echo $GITLAB_RELEASE_VERSION
