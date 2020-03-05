@@ -37,6 +37,6 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        cat $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+        echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
         docker push ${{ env.IMAGE_REPO }}:latest
         docker push ${{ env.IMAGE_REPO }}:${{ env.GITLAB_RELEASE_VERSION }}
