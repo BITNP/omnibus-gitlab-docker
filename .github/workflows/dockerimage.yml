@@ -33,9 +33,10 @@ jobs:
         export TEST_DOCKER_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test`
         if ! docker exec test ssh -v nonexisting@127.0.0.1 2>&1 | grep "${OPENSSH_MATCH}"; then docker ps && docker logs test;exit 1; fi
     - name: Publish to Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: ${{ env.IMAGE_REPO }}
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: latest,${{ env.GITLAB_RELEASE_VERSION }}
+      env: # Or as an environment variable
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        cat $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+        docker push ${{ env.IMAGE_REPO }}:latest
+        docker push ${{ env.IMAGE_REPO }}:${{ env.GITLAB_RELEASE_VERSION }}
