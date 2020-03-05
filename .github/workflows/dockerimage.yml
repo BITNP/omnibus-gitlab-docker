@@ -25,8 +25,6 @@ jobs:
         sleep 10
         export GITLAB_RELEASE_VERSION=$(docker exec test cat /RELEASE|grep -oP "RELEASE_VERSION=\K(.+)(?=-)")
         echo $GITLAB_RELEASE_VERSION
-        # tag
-        docker tag $IMAGE_REPO:latest $IMAGE_REPO:$GITLAB_RELEASE_VERSION
         # we use nonexisting to sign in intentionally - we don't want to go through the login process
         # because we just need the version info
         if docker ps -a | grep test | grep "Stop\|Restart\|Exit"; then docker logs test;exit 1; fi
@@ -38,5 +36,7 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
         echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-        docker push ${{ env.IMAGE_REPO }}:latest
-        docker push ${{ env.IMAGE_REPO }}:${{ env.GITLAB_RELEASE_VERSION }}
+        docker push $IMAGE_REPO:latest
+        # tag
+        docker tag $IMAGE_REPO:latest $IMAGE_REPO:$GITLAB_RELEASE_VERSION
+        docker push $IMAGE_REPO:$GITLAB_RELEASE_VERSION
