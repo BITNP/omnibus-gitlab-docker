@@ -23,7 +23,7 @@ jobs:
       run: |
         docker run -d --name test $IMAGE_REPO:latest
         sleep 10
-        export GITLAB_RELEASE_VERSION=$(docker exec test cat /RELEASE)
+        export GITLAB_RELEASE_VERSION=$(docker exec test cat /RELEASE|grep -oP "RELEASE_VERSION=\K(.+)(?=-)")
         echo $GITLAB_RELEASE_VERSION
     - name: Test SSH version
       # we use nonexisting to sign in intentionally - we don't want to go through the login process
@@ -35,7 +35,7 @@ jobs:
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: ${{ env.IMAGE_REPO }}
+        name: ${{ env.IMAGE_REPO }}:latest
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         tags: latest,${{ env.GITLAB_RELEASE_VERSION }}
