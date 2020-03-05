@@ -9,6 +9,7 @@ env:
   OPENSSH_VERSION: openssh-8.2p1
   OPENSSH_MATCH: remote software version OpenSSH_8.2
   IMAGE_REPO: bitnp/gitlab-ce
+  IMAGE_TAG: latest
 
 jobs:
   testpub:
@@ -18,13 +19,11 @@ jobs:
     - name: Build the Docker image
       run: |
         docker pull gitlab/gitlab-ce:latest
-        docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_REPO:latest
+        docker build . --file Dockerfile --build-arg OPENSSH_VERSION=$OPENSSH_VERSION --tag $IMAGE_REPO:$IMAGE_TAG
     - name: Test SSH version
       run: |
-        docker run -d --name test $IMAGE_REPO:latest
+        docker run -d --name test $IMAGE_REPO:$IMAGE_TAG
         sleep 10
-        export GITLAB_RELEASE_VERSION=$(docker exec test cat /RELEASE|grep -oP "RELEASE_VERSION=\K(.+)(?=-)")
-        echo $GITLAB_RELEASE_VERSION
         # we use nonexisting to sign in intentionally - we don't want to go through the login process
         # because we just need the version info
         if docker ps -a | grep test | grep "Stop\|Restart\|Exit"; then docker logs test;exit 1; fi
@@ -36,7 +35,9 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
         echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-        docker push $IMAGE_REPO:latest
+        docker push $IMAGE_REPO:$IMAGE_TAG
+        export GITLAB_RELEASE_VERSION=$(docker run --rm $IMAGE_REPO:$IMAGE_TAG cat /RELEASE|grep -oP "RELEASE_VERSION=\K(.+)(?=-)")
+        echo $GITLAB_RELEASE_VERSION        
         # tag
-        docker tag $IMAGE_REPO:latest $IMAGE_REPO:$GITLAB_RELEASE_VERSION
+        docker tag $IMAGE_REPO:$IMAGE_TAG $IMAGE_REPO:$GITLAB_RELEASE_VERSION
         docker push $IMAGE_REPO:$GITLAB_RELEASE_VERSION
